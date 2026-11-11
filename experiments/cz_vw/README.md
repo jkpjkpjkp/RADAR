@@ -1,5 +1,8 @@
 # CZ202 / value-weighted RADAR protocol
 
+[Completed one-window results](summary/README.md): gross annual alpha 11.72%
+(p=0.174), after 10 bp costs 7.41% (p=0.392); neither is statistically significant.
+
 This is a separate empirical adaptation, not a claim of reproducing the paper's
 377-stock sample. It reuses RADAR's architecture, diffusion, retrieval, optimizer,
 validation selection and checkpoint format. Native commands keep their defaults.

@@ -1,5 +1,13 @@
 # RADAR
 
+## CZ202 protocol adaptation in this fork
+
+The opt-in [CZ202 experiment](experiments/cz_vw/README.md) reuses RADAR with
+lagged NYSE20 filtering, cap-weighted D10−D1 portfolios and FF5+UMD/HAC inference.
+Its [completed one-window results](experiments/cz_vw/summary/README.md) estimate
+11.72% gross and 7.41% after-cost annual alpha; neither is statistically significant.
+The native commands below retain their original behavior.
+
 Official research code for **Retrieval-Augmented Diffusion Modeling for
 Stochastic Discount Factor Portfolios** (NeurIPS 2026).
 

@@ -78,7 +78,8 @@ def main():
     assert verify_cache(args.shared_data)["manifest_sha256"] == audit["manifest_sha256"]
     data = Panel(args.shared_data, data_dir / "news.pt")
     windows = rolling_windows(len(data.dates), cfg)
-    window = windows[args.window - 1]
+    # JSON round-trips tuples as lists; keep the in-memory lock canonical too.
+    window = list(windows[args.window - 1])
     code = list(Path(__file__).parent.glob("*.py")) + list(Path("radar").glob("*.py"))
     lock = {
         "config": asdict(cfg),

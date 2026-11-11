@@ -1,0 +1,7 @@
+{
+  "reason": "Convert numpy string date metadata to plain Python strings for restricted checkpoint loading",
+  "original_sha256": "8980962f94958ce031e93724e0b8d55b0ae00bca2ee93f8f2c77e1be64081ae4",
+  "evaluation_sha256": "7325d74b8567d912346ba23b9a0a5f74d15e8d02590aebff8e4e33fd307a4f2d",
+  "unchanged_model_tensors": 41,
+  "training_not_repeated": true
+}

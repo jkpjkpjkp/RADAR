@@ -1,5 +1,8 @@
 """Accounting and timing fixtures are tests, never empirical portfolio evidence."""
 
+import json
+import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -10,6 +13,86 @@ import torch
 from .data import Panel, histories, prior_month
 from .evaluate import fit_alpha
 from .portfolio import backtest, decile_targets
+
+
+def test_resume_preserves_checkpoint_and_does_not_retrain(tmp_path, monkeypatch):
+    from . import run
+
+    # A tiny real Panel exercises NumPy date loading and restricted checkpoint I/O.
+    dates = (
+        pd.bdate_range("2011-06-02", periods=1260)
+        .strftime("%Y-%m-%d")
+        .to_numpy(dtype="U10")
+    )
+    for name, value in {
+        "dates": dates,
+        "symbols": np.array(["P1"]),
+        "monthly_features": np.zeros((1, 1, 202), np.float32),
+        "month_index": np.zeros(len(dates), int),
+        **{
+            n: np.ones((1, len(dates)))
+            for n in (
+                "member",
+                "tradable",
+                "totalret",
+                "terminal_events",
+                "price_return",
+                "lagged_cap",
+            )
+        },
+    }.items():
+        np.save(tmp_path / f"{name}.npy", value)
+    torch.save({"data": {}}, tmp_path / "news.pt")
+    factors = tmp_path / "factors.parquet"
+    factors.write_bytes(b"unused fixture factors")
+    audit = {"news_sha256": run.sha(tmp_path / "news.pt"), "manifest_sha256": "fixture"}
+    (tmp_path / "data_audit.json").write_text(json.dumps(audit))
+    monkeypatch.setattr(run, "verify_cache", lambda _: {"manifest_sha256": "fixture"})
+    calls = []
+
+    def train(k, window, data, cfg, out, **kwargs):
+        calls.append(k)
+        model = run.RADAR(cfg)
+        checkpoint = {
+            "model_state_dict": model.state_dict(),
+            "config": run.asdict(cfg),
+            "train_period": [data.dates[0], data.dates[1007]],
+        }
+        torch.save(checkpoint, Path(out) / "window_1.pt")
+        return {"checkpoint": "window_1.pt", "best_val_loss": 0.1}
+
+    monkeypatch.setattr(run, "train_window", train)
+    monkeypatch.setattr(run, "histories", lambda *args: ([], [], []))
+    monkeypatch.setattr(run.RADAR, "build_context_bank", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        run, "predict", lambda *args: pd.DataFrame({"date": ["2015-06-08"]})
+    )
+    monkeypatch.setattr(run, "evaluate", lambda *args: None)
+    output = tmp_path / "output"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run",
+            "--shared_data",
+            str(tmp_path),
+            "--data_dir",
+            str(tmp_path),
+            "--factors",
+            str(factors),
+            "--output",
+            str(output),
+            "--device",
+            "cpu",
+            "--epochs",
+            "1",
+        ],
+    )
+    run.main()
+    first_hash = run.sha(output / "window_1.pt")
+    run.main()
+    assert calls == [1]
+    assert run.sha(output / "window_1.pt") == first_hash
 
 
 def fixture_panel():

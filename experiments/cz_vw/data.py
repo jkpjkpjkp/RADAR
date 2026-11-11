@@ -70,7 +70,8 @@ class Panel:
         dates = np.load(folder / "dates.npy")
         a, b = np.searchsorted(dates, [start, end])
         b += int(b < len(dates) and dates[b] == end)
-        self.dates = dates[a:b]
+        # Match MarketData's Python-string contract for weights_only checkpoints.
+        self.dates = dates[a:b].tolist()
         self.symbols = np.load(folder / "symbols.npy")
         self.tickers = (
             self.symbols.tolist()

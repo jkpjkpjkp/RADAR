@@ -1,0 +1,20 @@
+[
+  {
+    "cost_bp": 0,
+    "days": 251,
+    "cumulative_return": 0.1803588880845055,
+    "max_drawdown": 0.17618467844588936,
+    "missing_held_count": 0,
+    "missing_gross_weight_days": 0.0,
+    "final_unliquidated_dollars": 0.0
+  },
+  {
+    "cost_bp": 10,
+    "days": 251,
+    "cumulative_return": 0.1306352706369609,
+    "max_drawdown": 0.18341813252386263,
+    "missing_held_count": 0,
+    "missing_gross_weight_days": 0.0,
+    "final_unliquidated_dollars": 0.0
+  }
+]
